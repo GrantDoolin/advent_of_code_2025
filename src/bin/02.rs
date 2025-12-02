@@ -1,3 +1,5 @@
+use std::process::id;
+
 advent_of_code::solution!(2);
 
 struct IdGroup {
@@ -5,32 +7,16 @@ struct IdGroup {
     end: u64,
 }
 
-impl IdGroup {
-    fn is_invalid(&mut self) -> bool {
-        let len = IdGroup::get_num_digits_u64(self.start);
-        if len % 2 == 1 || len == 0 {
-            return false;
-        } //id is odd and therefore not invalid or len is 0 and is not an ID
-        let len = len / 2;
-        let start_1 = self.start;
-        let start_2: u64 = start_1.to_string().split_off(len).parse::<u64>().unwrap(); //ParseIntError { kind: Empty }
-        if start_1 == start_2 {
-            self.start += 1;
-            return true;
-        }
-        true
+pub fn get_num_digits_u64(mut n: u64) -> usize {
+    if n == 0 {
+        return 1; // Special case for 0, which has one digit
     }
-    pub fn get_num_digits_u64(mut n: u64) -> usize {
-        if n == 0 {
-            return 1; // Special case for 0, which has one digit
-        }
-        let mut count = 0;
-        while n > 0 {
-            n /= 10;
-            count += 1;
-        }
-        count
+    let mut count = 0;
+    while n > 0 {
+        n /= 10;
+        count += 1;
     }
+    count
 }
 
 /* # Part One
@@ -54,8 +40,33 @@ pub fn part_one(input: &str) -> Option<u64> {
 
     for mut group in ids {
         while group.start < group.end + 1 {
-            if IdGroup::is_invalid(&mut group) {
-                output += 1
+            let id = group.start;
+            let len = get_num_digits_u64(id);
+            if len % 2 == 0 {
+                let id_end = id
+                    .to_string()
+                    .drain(len / 2..len)
+                    .collect::<String>()
+                    .parse::<u64>()
+                    .unwrap();
+                let id_begin = id
+                    .to_string()
+                    .drain(0..len / 2)
+                    .collect::<String>()
+                    .parse::<u64>()
+                    .unwrap();
+                if id_begin.eq(&id_end) {
+                    //split id and see if part 1 is == to part 2
+                    output += id;
+                    group.start += 1;
+                } else {
+                    group.start += 1;
+                }
+            }
+            //need to check for odd numbers before id_end and id_begin creation
+            else if len % 2 == 1 {
+                //if ID has odd number of digits
+                group.start += 1;
             }
         }
     }
@@ -64,8 +75,7 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let output = 0;
-    Some(output)
+    None
 }
 
 #[cfg(test)]
@@ -84,3 +94,27 @@ mod tests {
         assert_eq!(result, None);
     }
 }
+
+/*
+*   println!("group in ids");
+'group_check: while group.start < group.end + 1 {
+    println!("before len check");
+    let len = get_num_digits_u64(group.start);
+    if len % 2 == 1 {
+        println!("did we get here");
+        group.start += 1;
+        continue 'group_check;
+    }
+    let len = len / 2;
+    let start_1 = group.start;
+    let start_2: u64 = start_1.to_string().split_off(len).parse::<u64>().unwrap();
+    if start_1 == start_2 {
+        group.start += 1;
+        output += 1;
+        println!("AHH!");
+    } else {
+        output += 1;
+        group.start += 1;
+    }
+}
+*/
