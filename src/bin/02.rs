@@ -8,11 +8,12 @@ struct IdGroup {
 impl IdGroup {
     fn is_invalid(&mut self) -> bool {
         let len = IdGroup::get_num_digits_u64(self.start);
-        if len % 2 == 1 {
+        if len % 2 == 1 || len == 0 {
             return false;
-        } //id is odd and therefore not invalid
+        } //id is odd and therefore not invalid or len is 0 and is not an ID
+        let len = len / 2;
         let start_1 = self.start;
-        let start_2: u64 = start_1.to_string().split_off(len).parse().unwrap();
+        let start_2: u64 = start_1.to_string().split_off(len).parse::<u64>().unwrap(); //ParseIntError { kind: Empty }
         if start_1 == start_2 {
             self.start += 1;
             return true;
