@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 advent_of_code::solution!(1);
 
 pub fn part_one(input: &str) -> Option<u64> {
@@ -7,18 +9,18 @@ pub fn part_one(input: &str) -> Option<u64> {
         let cur_line = line;
         if cur_line.trim().contains("R") {
             let cur_line = &cur_line[1..];
-            value = value + cur_line.parse::<i32>().unwrap().rem_euclid(100);
+            value += cur_line.parse::<i32>().unwrap().rem_euclid(100);
             if value > 99 {
-                value = value - 100;
+                value -= 100;
             }
             if value == 0 {
                 password += 1;
             }
         } else {
             let cur_line = &cur_line[1..];
-            value = value - cur_line.parse::<i32>().unwrap().rem_euclid(100);
+            value -= cur_line.parse::<i32>().unwrap().rem_euclid(100);
             if value < 0 {
-                value = value + 100;
+                value += 100;
             }
             if value == 0 {
                 password += 1;
@@ -36,14 +38,14 @@ pub fn part_two(input: &str) -> Option<u64> {
         if cur_line.trim().contains("R") {
             let cur_line = &cur_line[1..];
             if cur_line.parse::<u64>().unwrap() > 99 {
-                password = password + (cur_line.parse::<u64>().unwrap() / 100)
+                password += cur_line.parse::<u64>().unwrap() / 100;
             }
             let pref_value = value;
-            value = value + cur_line.parse::<i32>().unwrap().rem_euclid(100);
+            value += cur_line.parse::<i32>().unwrap().rem_euclid(100);
             if value == 0 {
                 password += 1;
             } else if value > 99 {
-                value = value - 100;
+                value -= 100;
                 if pref_value != 0 {
                     password += 1
                 }
@@ -51,17 +53,18 @@ pub fn part_two(input: &str) -> Option<u64> {
         } else {
             let cur_line = &cur_line[1..];
             if cur_line.parse::<u64>().unwrap() > 99 {
-                password = password + (cur_line.parse::<u64>().unwrap() / 100)
+                password += cur_line.parse::<u64>().unwrap() / 100
             }
             let pref_value = value;
-            value = value - cur_line.parse::<i32>().unwrap().rem_euclid(100);
-            if value == 0 {
-                password += 1;
-            } else if value < 0 {
-                value = value + 100;
-                if pref_value != 0 {
-                    password += 1
+            value -= cur_line.parse::<i32>().unwrap().rem_euclid(100);
+            match value.cmp(&0) {
+                Ordering::Less => {
+                    if pref_value != 0 {
+                        value += 100
+                    }
                 }
+                Ordering::Greater => (),
+                Ordering::Equal => password += 1,
             }
         }
     }
